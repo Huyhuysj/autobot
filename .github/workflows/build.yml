@@ -23,10 +23,23 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Setup Geode Profile
+      - name: Initialize Geode config and profile
         run: |
-          # Tự động gửi Enter để chọn cấu hình mặc định
-          printf '\n' | geode config setup
+          # Tạo cấu trúc thư mục cần thiết
+          mkdir -p ~/.geode/profiles/default
+          # Tạo config.json chọn profile mặc định
+          cat > ~/.geode/config.json << 'EOF'
+          {
+            "default_profile": "default"
+          }
+          EOF
+          # Tạo profile.json cho profile "default"
+          cat > ~/.geode/profiles/default/profile.json << 'EOF'
+          {
+            "name": "default"
+          }
+          EOF
+          echo "Profile structure created."
 
       - name: Setup Geode SDK
         run: |
