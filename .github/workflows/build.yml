@@ -23,10 +23,9 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Create default Geode profile
+      - name: Create default profile
         run: |
-          mkdir -p ~/.geode/profiles/default
-          echo '{}' > ~/.geode/profiles/default/profile.json
+          geode config setup --default
 
       - name: Setup Geode SDK
         run: |
