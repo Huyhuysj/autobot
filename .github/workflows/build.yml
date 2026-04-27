@@ -12,20 +12,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Geode CLI
+      - name: Install Geode CLI v3.7.4
         run: |
-          ASSETS=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[].name')
-          echo "Available assets: $ASSETS"
-          
-          ASSET_URL=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[] | select(.name | test("mac.*\\.zip$")) | .browser_download_url' | head -1)
-          
-          if [ -z "$ASSET_URL" ]; then
-            echo "ERROR: Không tìm thấy asset macOS .zip."
-            exit 1
-          fi
-          
-          echo "Downloading: $ASSET_URL"
-          curl -L -o geode.zip "$ASSET_URL"
+          # Link tải trực tiếp – không gọi API, tránh bị rate limit
+          CLI_URL="https://github.com/geode-sdk/cli/releases/download/v3.7.4/geode-cli-v3.7.4-mac.zip"
+          echo "Downloading $CLI_URL"
+          curl -L -o geode.zip "$CLI_URL"
           unzip -o geode.zip
           BIN=$(find . -name geode -type f | head -1)
           chmod +x "$BIN"
