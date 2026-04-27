@@ -14,21 +14,20 @@ jobs:
 
       - name: Install Geode CLI
         run: |
-          # Lấy danh sách asset, in ra để debug (nếu cần)
           ASSETS=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[].name')
           echo "Available assets: $ASSETS"
           
-          # Lọc asset chứa 'macos-arm64' và kết thúc bằng '.tar.gz'
-          ASSET_URL=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[] | select(.name | contains("macos-arm64") and endswith(".tar.gz")) | .browser_download_url' | head -1)
+          # Lấy asset chứa "mac" và kết thúc bằng ".zip"
+          ASSET_URL=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[] | select(.name | test("mac.*\\.zip$")) | .browser_download_url' | head -1)
           
           if [ -z "$ASSET_URL" ]; then
-            echo "ERROR: Không tìm thấy asset macos-arm64 .tar.gz. Xem danh sách ở trên."
+            echo "ERROR: Không tìm thấy asset macOS .zip."
             exit 1
           fi
           
           echo "Downloading: $ASSET_URL"
-          curl -L -o geode.tar.gz "$ASSET_URL"
-          tar -xzf geode.tar.gz
+          curl -L -o geode.zip "$ASSET_URL"
+          unzip geode.zip
           BIN=$(find . -name geode -type f | head -1)
           chmod +x "$BIN"
           sudo mv "$BIN" /usr/local/bin/geode
