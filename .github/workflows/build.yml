@@ -1,0 +1,29 @@
+name: Build iOS Mod
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Cho phép bạn bấm nút build thủ công
+
+jobs:
+  build:
+    name: Build iOS
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sử dụng Action chính thức của Geode để build
+      - name: Build Mod
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          bindings: geode-sdk/bindings
+          bindings-ref: main
+          target: ios
+
+      # Upload file .geode sau khi build xong để bạn tải về
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iOS-Mod-Build
+          path: ${{ github.workspace }}/*.geode
