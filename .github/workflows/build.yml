@@ -23,26 +23,37 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Download & Setup Geode SDK 3.0.0
+      - name: Download & Setup Geode SDK 3.0.0 (Development Package)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Lấy URL asset macOS (.zip) từ release v3.0.0
+          # Lấy asset development package: tên chứa "sdk" và "mac" hoặc "macos", đuôi .zip
           ASSET_URL=$(gh api repos/geode-sdk/geode/releases/tags/v3.0.0 \
-            --jq '.assets[] | select(.name | test("mac.*\\.zip$")) | .browser_download_url')
+            --jq '.assets[] | select(.name | test("sdk.*(mac|macos).*\\.zip$")) | .browser_download_url' | head -1)
+          
+          # Nếu không tìm thấy, liệt kê tất cả asset để debug
+          if [ -z "$ASSET_URL" ]; then
+            echo "Không tìm thấy asset SDK. Danh sách tất cả asset:"
+            gh api repos/geode-sdk/geode/releases/tags/v3.0.0 --jq '.assets[].name'
+            exit 1
+          fi
+          
           echo "Downloading SDK from $ASSET_URL"
           curl -L -o geode-sdk.zip "$ASSET_URL"
           mkdir -p $HOME/geode-sdk
           unzip -o geode-sdk.zip -d $HOME/geode-sdk
-
-          # Tìm vị trí của GeodeConfig.cmake
+          
+          echo "SDK contents (first 20 files):"
+          find $HOME/geode-sdk -type f | head -20
+          
+          # Tìm GeodeConfig.cmake
           GEODE_CONFIG=$(find $HOME/geode-sdk -name "GeodeConfig.cmake" -print -quit)
           if [ -z "$GEODE_CONFIG" ]; then
-            echo "ERROR: Không tìm thấy GeodeConfig.cmake trong SDK đã tải."
+            echo "ERROR: GeodeConfig.cmake không tồn tại. Toàn bộ file trong SDK:"
+            find $HOME/geode-sdk -type f
             exit 1
           fi
-
-          # Xác định thư mục gốc SDK (thường là thư mục chứa lib/cmake/Geode)
+          
           GEODE_ROOT=$(dirname $(dirname "$GEODE_CONFIG"))
           echo "GEODE_SDK=$GEODE_ROOT" >> $GITHUB_ENV
           echo "Geode SDK root: $GEODE_ROOT"
