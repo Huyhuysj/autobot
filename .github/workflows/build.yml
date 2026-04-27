@@ -23,30 +23,18 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Initialize Geode config and profile
+      - name: Setup Geode SDK manually
         run: |
-          # Tạo cấu trúc thư mục cần thiết
-          mkdir -p ~/.geode/profiles/default
-          # Tạo config.json chọn profile mặc định
-          cat > ~/.geode/config.json << 'EOF'
-          {
-            "default_profile": "default"
-          }
-          EOF
-          # Tạo profile.json cho profile "default"
-          cat > ~/.geode/profiles/default/profile.json << 'EOF'
-          {
-            "name": "default"
-          }
-          EOF
-          echo "Profile structure created."
-
-      - name: Setup Geode SDK
-        run: |
-          MOD_VERSION=$(jq -r '.geode' mod.json)
-          echo "Installing SDK version $MOD_VERSION"
-          geode sdk install "$MOD_VERSION"
-          echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
+          # Tải SDK 3.0.0 cho macOS từ release (định dạng .tar.gz)
+          SDK_URL="https://github.com/geode-sdk/geode/releases/download/v3.0.0/geode-sdk-v3.0.0-mac.tar.gz"
+          echo "Downloading SDK from $SDK_URL"
+          curl -L -o geode-sdk.tar.gz "$SDK_URL"
+          # Tạo thư mục SDK và giải nén
+          mkdir -p $HOME/geode-sdk
+          tar -xzf geode-sdk.tar.gz -C $HOME/geode-sdk
+          # Đặt biến môi trường GEODE_SDK cho các bước sau
+          echo "GEODE_SDK=$HOME/geode-sdk" >> $GITHUB_ENV
+          echo "SDK installed at $HOME/geode-sdk"
 
       - name: Build mod
         run: |
