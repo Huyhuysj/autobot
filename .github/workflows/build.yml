@@ -23,16 +23,14 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Setup Geode SDK manually
+      - name: Download Geode SDK 3.0.0 via GitHub API
         run: |
-          # Tải SDK 3.0.0 cho macOS từ release (định dạng .tar.gz)
-          SDK_URL="https://github.com/geode-sdk/geode/releases/download/v3.0.0/geode-sdk-v3.0.0-mac.tar.gz"
-          echo "Downloading SDK from $SDK_URL"
-          curl -L -o geode-sdk.tar.gz "$SDK_URL"
-          # Tạo thư mục SDK và giải nén
+          # Lấy URL asset macOS (.zip) từ bản phát hành v3.0.0
+          ASSET_URL=$(gh api repos/geode-sdk/geode/releases/tags/v3.0.0 --jq '.assets[] | select(.name | test("mac.*\\.zip$")) | .browser_download_url')
+          echo "Downloading SDK from $ASSET_URL"
+          curl -L -o geode-sdk.zip "$ASSET_URL"
           mkdir -p $HOME/geode-sdk
-          tar -xzf geode-sdk.tar.gz -C $HOME/geode-sdk
-          # Đặt biến môi trường GEODE_SDK cho các bước sau
+          unzip -o geode-sdk.zip -d $HOME/geode-sdk
           echo "GEODE_SDK=$HOME/geode-sdk" >> $GITHUB_ENV
           echo "SDK installed at $HOME/geode-sdk"
 
