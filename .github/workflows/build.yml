@@ -2,8 +2,8 @@ name: Build iOS Mod
 
 on:
   push:
-    branches: [ "main", "master" ]
-  workflow_dispatch: # Cho phép bạn bấm nút build thủ công
+    branches: ["main", "master"]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,17 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Sử dụng Action chính thức của Geode để build
-      - name: Build Mod
+      - name: Build Mod for iOS
         uses: geode-sdk/build-geode-mod@main
         with:
-          bindings: geode-sdk/bindings
-          bindings-ref: main
-          target: ios
+          platform: ios          # <--- BẮT BUỘC, đây là yếu tố bạn còn thiếu
+          build-config: release
+          export-pdb: false
+          export-stripped: false
 
-      # Upload file .geode sau khi build xong để bạn tải về
-      - name: Upload Artifact
+      - name: Upload .geode Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iOS-Mod-Build
+          name: AutoBot-iOS
           path: ${{ github.workspace }}/*.geode
