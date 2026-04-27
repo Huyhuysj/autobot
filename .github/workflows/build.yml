@@ -14,7 +14,6 @@ jobs:
 
       - name: Install Geode CLI v3.7.4
         run: |
-          # Link tải trực tiếp – không gọi API, tránh bị rate limit
           CLI_URL="https://github.com/geode-sdk/cli/releases/download/v3.7.4/geode-cli-v3.7.4-mac.zip"
           echo "Downloading $CLI_URL"
           curl -L -o geode.zip "$CLI_URL"
@@ -23,6 +22,11 @@ jobs:
           chmod +x "$BIN"
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
+
+      - name: Create default Geode profile
+        run: |
+          mkdir -p ~/.geode/profiles/default
+          echo '{}' > ~/.geode/profiles/default/profile.json
 
       - name: Setup Geode SDK
         run: |
