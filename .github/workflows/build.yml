@@ -17,7 +17,6 @@ jobs:
           ASSETS=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[].name')
           echo "Available assets: $ASSETS"
           
-          # Lấy asset chứa "mac" và kết thúc bằng ".zip"
           ASSET_URL=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[] | select(.name | test("mac.*\\.zip$")) | .browser_download_url' | head -1)
           
           if [ -z "$ASSET_URL" ]; then
@@ -27,7 +26,7 @@ jobs:
           
           echo "Downloading: $ASSET_URL"
           curl -L -o geode.zip "$ASSET_URL"
-          unzip geode.zip
+          unzip -o geode.zip
           BIN=$(find . -name geode -type f | head -1)
           chmod +x "$BIN"
           sudo mv "$BIN" /usr/local/bin/geode
@@ -35,7 +34,6 @@ jobs:
 
       - name: Setup Geode SDK
         run: |
-          geode profile create CI
           MOD_VERSION=$(jq -r '.geode' mod.json)
           echo "Installing SDK version $MOD_VERSION"
           geode sdk install "$MOD_VERSION"
