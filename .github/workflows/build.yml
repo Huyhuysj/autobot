@@ -7,22 +7,35 @@ on:
 
 jobs:
   build:
-    name: Build iOS
     runs-on: macos-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build Mod for iOS
-        uses: geode-sdk/build-geode-mod@main
-        with:
-          platform: ios          # <--- BẮT BUỘC, đây là yếu tố bạn còn thiếu
-          build-config: release
-          export-pdb: false
-          export-stripped: false
+      - name: Install Geode CLI
+        run: |
+          # Tải bản CLI ổn định (v3.7.4) - định dạng .tar.gz
+          curl -L -o geode.tar.gz https://github.com/geode-sdk/cli/releases/download/v3.7.4/geode-cli-v3.7.4-macos-arm64.tar.gz
+          tar -xzf geode.tar.gz
+          BIN_PATH=$(find . -name geode -type f | head -1)
+          chmod +x "$BIN_PATH"
+          sudo mv "$BIN_PATH" /usr/local/bin/geode
 
-      - name: Upload .geode Artifact
+      - name: Setup Geode SDK for iOS
+        run: |
+          # Tạo profile và cài SDK đúng phiên bản mod.json yêu cầu (3.0.0)
+          geode profile create GithubActions
+          geode sdk install 3.0.0
+          # Lưu đường dẫn SDK vào GITHUB_ENV để CMake dùng được
+          echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
+
+      - name: Build mod
+        run: |
+          # Lúc này GEODE_SDK đã được thiết lập, CMake sẽ tìm thấy Geode
+          geode build --platform ios --config release
+
+      - name: Upload .geode artifact
         uses: actions/upload-artifact@v4
         with:
           name: AutoBot-iOS
-          path: ${{ github.workspace }}/*.geode
+          path: "*.geode"
