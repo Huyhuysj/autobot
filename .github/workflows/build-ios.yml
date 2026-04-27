@@ -1,20 +1,42 @@
 name: Build iOS Geode Mod
+
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Geode CLI
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Geode CLI (Auto-detect tên file mới nhất)
         run: |
-          curl -L -o geode.zip https://github.com/geode-sdk/cli/releases/latest/download/geode-macos-arm64.zip
-          unzip geode.zip -d geode_bin
-          chmod +x geode_bin/geode
-          sudo mv geode_bin/geode /usr/local/bin/
+          # Lấy URL tải của asset macos-arm64 từ release mới nhất
+          ASSET_URL=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest \
+            | jq -r '.assets[] | select(.name | test("macos-arm64")) | .browser_download_url')
+          
+          echo "Tải từ: $ASSET_URL"
+          curl -L -o geode_asset.tar.gz "$ASSET_URL"
+          
+          # Giải nén (tarball chứa file geode ở gốc hoặc trong thư mục con)
+          tar -xzf geode_asset.tar.gz
+          # Nếu giải nén ra thư mục, tìm file geode bên trong
+          if [ -f geode ]; then
+            BIN_PATH="geode"
+          else
+            BIN_PATH=$(find . -name geode -type f | head -1)
+          fi
+          echo "File thực thi: $BIN_PATH"
+          chmod +x "$BIN_PATH"
+          sudo mv "$BIN_PATH" /usr/local/bin/geode
+
       - name: Build mod
-        run: geode build --platform ios
+        run: |
+          geode build --platform ios
+
       - name: Upload .geode artifact
         uses: actions/upload-artifact@v4
         with:
