@@ -12,26 +12,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Geode CLI (Auto-detect tên file mới nhất)
+      - name: Install Geode CLI
         run: |
-          # Lấy URL tải của asset macos-arm64 từ release mới nhất
+          # Lấy URL asset macos-arm64 từ release mới nhất (định dạng .tar.gz)
           ASSET_URL=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest \
             | jq -r '.assets[] | select(.name | test("macos-arm64")) | .browser_download_url')
           
-          echo "Tải từ: $ASSET_URL"
-          curl -L -o geode_asset.tar.gz "$ASSET_URL"
+          echo "Đang tải từ: $ASSET_URL"
+          curl -L -o geode.tar.gz "$ASSET_URL"
           
-          # Giải nén (tarball chứa file geode ở gốc hoặc trong thư mục con)
-          tar -xzf geode_asset.tar.gz
-          # Nếu giải nén ra thư mục, tìm file geode bên trong
-          if [ -f geode ]; then
-            BIN_PATH="geode"
-          else
-            BIN_PATH=$(find . -name geode -type f | head -1)
-          fi
-          echo "File thực thi: $BIN_PATH"
+          # Giải nén tar.gz – file thực thi tên "geode" có thể nằm ở gốc hoặc trong thư mục con
+          tar -xzf geode.tar.gz
+          BIN_PATH=$(find . -name geode -type f | head -1)
+          echo "Tìm thấy Geode CLI tại: $BIN_PATH"
           chmod +x "$BIN_PATH"
           sudo mv "$BIN_PATH" /usr/local/bin/geode
+          geode --version
 
       - name: Build mod
         run: |
