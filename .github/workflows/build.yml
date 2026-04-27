@@ -12,44 +12,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Geode CLI (auto-detect latest asset)
+      - name: Install Geode CLI
         run: |
-          # Dùng Python để lấy URL asset macos-arm64 (.tar.gz) từ release mới nhất
-          ASSET_URL=$(python3 -c "
-import urllib.request, json
-url = 'https://api.github.com/repos/geode-sdk/cli/releases/latest'
-with urllib.request.urlopen(url) as r:
-    data = json.load(r)
-for asset in data['assets']:
-    name = asset['name']
-    if 'macos-arm64' in name and name.endswith('.tar.gz'):
-        print(asset['browser_download_url'])
-        break
-")
-          echo "Downloading $ASSET_URL"
+          # Lấy URL asset mới nhất cho macOS ARM64 (.tar.gz)
+          ASSET_URL=$(curl -s https://api.github.com/repos/geode-sdk/cli/releases/latest | jq -r '.assets[] | select(.name | test("macos-arm64.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
+          echo "Downloading: $ASSET_URL"
           curl -L -o geode.tar.gz "$ASSET_URL"
-          # Giải nén và cài đặt
           tar -xzf geode.tar.gz
-          BIN_PATH=$(find . -name geode -type f | head -1)
-          chmod +x "$BIN_PATH"
-          sudo mv "$BIN_PATH" /usr/local/bin/geode
+          BIN=$(find . -name geode -type f | head -1)
+          chmod +x "$BIN"
+          sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
       - name: Setup Geode SDK
         run: |
           geode profile create CI
-          # Đọc phiên bản SDK từ mod.json (vd: "3.0.0")
-          MOD_VERSION=$(python3 -c "import json; print(json.load(open('mod.json'))['geode'])")
+          MOD_VERSION=$(jq -r '.geode' mod.json)
           echo "Installing SDK version $MOD_VERSION"
           geode sdk install "$MOD_VERSION"
-          # Lưu đường dẫn SDK vào biến môi trường cho CMake
           echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
 
       - name: Build mod
         run: |
           geode build --platform ios --config release
 
-      - name: Upload .geode artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AutoBot-iOS
