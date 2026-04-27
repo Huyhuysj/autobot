@@ -23,16 +23,17 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Download Geode SDK 3.0.0 via GitHub API
+      - name: Download Geode SDK 3.0.0
+        env:
+          GH_TOKEN: ${{ github.token }}   # Bắt buộc để gh hoạt động
         run: |
-          # Lấy URL asset macOS (.zip) từ bản phát hành v3.0.0
-          ASSET_URL=$(gh api repos/geode-sdk/geode/releases/tags/v3.0.0 --jq '.assets[] | select(.name | test("mac.*\\.zip$")) | .browser_download_url')
+          ASSET_URL=$(gh api repos/geode-sdk/geode/releases/tags/v3.0.0 \
+            --jq '.assets[] | select(.name | test("mac.*\\.zip$")) | .browser_download_url')
           echo "Downloading SDK from $ASSET_URL"
           curl -L -o geode-sdk.zip "$ASSET_URL"
           mkdir -p $HOME/geode-sdk
           unzip -o geode-sdk.zip -d $HOME/geode-sdk
           echo "GEODE_SDK=$HOME/geode-sdk" >> $GITHUB_ENV
-          echo "SDK installed at $HOME/geode-sdk"
 
       - name: Build mod
         run: |
