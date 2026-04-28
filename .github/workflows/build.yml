@@ -37,6 +37,7 @@ jobs:
           echo "Installing SDK version $MOD_VERSION"
           geode sdk install "$MOD_VERSION"
           echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
+          echo "Geode_DIR=$(geode sdk path)" >> $GITHUB_ENV
 
       - name: Build mod
         run: |
