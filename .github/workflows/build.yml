@@ -36,6 +36,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Find GeodeConfig.cmake
+        if: matrix.config.target == 'iOS'
+        run: |
+          echo "=== ĐANG QUÉT TÌM GeodeConfig.cmake ==="
+          find /Users/runner -name "GeodeConfig.cmake" 2>/dev/null || true
+          find /usr/local -name "GeodeConfig.cmake" 2>/dev/null || true
+          echo "=== HOÀN TẤT QUÉT ==="
+
       - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
         with:
