@@ -23,8 +23,9 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Create default profile with platform ios
+      - name: Setup and Install Geode SDK
         run: |
+          # Create geode profile
           mkdir -p ~/.geode/profiles/default
           cat > ~/.geode/config.json << 'EOF'
           {
@@ -38,14 +39,10 @@ jobs:
           }
           EOF
           echo "Profile structure created for iOS."
-          cat ~/.geode/config.json
-          cat ~/.geode/profiles/default/profile.json
-
-      - name: Install Geode SDK
-        run: |
+          
+          # Install SDK
           MOD_VERSION=$(jq -r '.geode' mod.json)
           echo "Installing SDK version $MOD_VERSION"
-          mkdir -p ~/.geode/SDKs
           geode sdk install "$MOD_VERSION"
           echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
 
