@@ -29,7 +29,7 @@ jobs:
           mkdir -p ~/dummy_gd
           
           # Create geode profile natively using the CLI
-          geode profile add --name "default" --gd-path ~/dummy_gd
+          geode profile add --name "default" ~/dummy_gd
           echo "Profile created automatically via Geode CLI."
           
           # Install SDK
