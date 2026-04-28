@@ -45,7 +45,7 @@ jobs:
         run: |
           MOD_VERSION=$(jq -r '.geode' mod.json)
           echo "Installing SDK version $MOD_VERSION"
-          echo "" | geode config setup
+          mkdir -p ~/.geode/SDKs
           geode sdk install "$MOD_VERSION"
           echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
 
