@@ -46,8 +46,7 @@ jobs:
         run: |
           MOD_VERSION=$(jq -r '.geode' mod.json)
           echo "Installing SDK version $MOD_VERSION"
-          # Verify profile exists before installing
-          geode config status || geode config setup -p default --platform ios
+          geode config setup
           geode sdk install "$MOD_VERSION"
           echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
 
