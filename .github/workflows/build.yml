@@ -41,7 +41,6 @@ jobs:
         with:
           combine: true
           target: ${{ matrix.config.target }}
-          build-sdk: ${{ matrix.config.target == 'iOS' }}
 
   package:
     name: Package builds
