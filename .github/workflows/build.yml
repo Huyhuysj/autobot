@@ -1,50 +1,57 @@
-name: Build iOS Mod
+name: Build Geode Mod
 
 on:
-  push:
-    branches: ["main", "master"]
   workflow_dispatch:
+  push:
+    branches:
+      - "**"
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - name: Windows
+          os: windows-latest
+
+        - name: macOS
+          os: macos-latest
+
+        - name: iOS
+          os: macos-latest
+          target: iOS
+
+        - name: Android32
+          os: ubuntu-latest
+          target: Android32
+
+        - name: Android64
+          os: ubuntu-latest
+          target: Android64
+
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Geode CLI v3.7.4
-        run: |
-          CLI_URL="https://github.com/geode-sdk/cli/releases/download/v3.7.4/geode-cli-v3.7.4-mac.zip"
-          echo "Downloading $CLI_URL"
-          curl -L -o geode.zip "$CLI_URL"
-          unzip -o geode.zip
-          BIN=$(find . -name geode -type f | head -1)
-          chmod +x "$BIN"
-          sudo mv "$BIN" /usr/local/bin/geode
-          geode --version
-
-      - name: Setup and Install Geode SDK
-        run: |
-          # Create a dummy directory for GD path
-          mkdir -p ~/dummy_gd
-          
-          # Create geode profile natively using the CLI
-          geode profile add --name "default" ~/dummy_gd
-          echo "Profile created automatically via Geode CLI."
-          
-          # Install SDK
-          MOD_VERSION=$(jq -r '.geode' mod.json)
-          echo "Installing SDK version $MOD_VERSION"
-          geode sdk install "$MOD_VERSION"
-          echo "GEODE_SDK=$(geode sdk path)" >> $GITHUB_ENV
-          echo "Geode_DIR=$(geode sdk path)" >> $GITHUB_ENV
-
-      - name: Build mod
-        run: |
-          geode build --platform ios --config release -- -DGeode_DIR="$GEODE_SDK"
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Build the mod
+        uses: geode-sdk/build-geode-mod@main
         with:
-          name: AutoBot-iOS
-          path: "*.geode"
+          combine: true
+          target: ${{ matrix.config.target }}
+
+  package:
+    name: Package builds
+    runs-on: ubuntu-latest
+    needs: ['build']
+
+    steps:
+      - uses: geode-sdk/build-geode-mod/combine@main
+        id: build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Build Output
+          path: ${{ steps.build.outputs.build-output }}
