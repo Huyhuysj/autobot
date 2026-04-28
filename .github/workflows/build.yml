@@ -25,20 +25,12 @@ jobs:
 
       - name: Setup and Install Geode SDK
         run: |
-          # Create geode profile
-          mkdir -p ~/.geode/profiles/default
-          cat > ~/.geode/config.json << 'EOF'
-          {
-            "default_profile": "default"
-          }
-          EOF
-          cat > ~/.geode/profiles/default/profile.json << 'EOF'
-          {
-            "name": "default",
-            "platform": "ios"
-          }
-          EOF
-          echo "Profile structure created for iOS."
+          # Create a dummy directory for GD path
+          mkdir -p ~/dummy_gd
+          
+          # Create geode profile natively using the CLI
+          geode profile add --name "default" --gd-path ~/dummy_gd
+          echo "Profile created automatically via Geode CLI."
           
           # Install SDK
           MOD_VERSION=$(jq -r '.geode' mod.json)
