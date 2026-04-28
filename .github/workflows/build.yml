@@ -23,11 +23,22 @@ jobs:
           sudo mv "$BIN" /usr/local/bin/geode
           geode --version
 
-      - name: Setup Geode profile (auto)
+      - name: Create default profile with platform ios
         run: |
-          # Gửi tên profile "default" và Enter
-          printf 'default\n' | geode config setup
-  
+          mkdir -p ~/.geode/profiles/default
+          cat > ~/.geode/config.json << 'EOF'
+          {
+            "default_profile": "default"
+          }
+          EOF
+          cat > ~/.geode/profiles/default/profile.json << 'EOF'
+          {
+            "name": "default",
+            "platform": "ios"
+          }
+          EOF
+          echo "Profile structure created for iOS."
+
       - name: Install Geode SDK
         run: |
           MOD_VERSION=$(jq -r '.geode' mod.json)
