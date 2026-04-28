@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.13.4)
 project(auto-bot-mod VERSION 1.0.0) 
 
+# Ép CMake chủ động lấy đường dẫn từ biến môi trường của hệ thống
+if(DEFINED ENV{GEODE_SDK})
+    set(Geode_DIR "$ENV{GEODE_SDK}")
+endif()
+
 # Tìm và liên kết Geode SDK
 find_package(Geode REQUIRED)
 
