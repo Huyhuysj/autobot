@@ -1,21 +1,16 @@
 cmake_minimum_required(VERSION 3.13.4)
 project(auto-bot-mod VERSION 1.0.0) 
 
-# 1. Tìm chính xác thư mục chứa GeodeConfig.cmake bên trong GEODE_SDK
-file(GLOB_RECURSE GEODE_CONFIG_FILES "$ENV{GEODE_SDK}/*GeodeConfig.cmake")
-if(GEODE_CONFIG_FILES)
-    list(GET GEODE_CONFIG_FILES 0 FIRST_CONFIG)
-    get_filename_component(FOUND_GEODE_DIR "${FIRST_CONFIG}" DIRECTORY)
-    set(Geode_DIR "${FOUND_GEODE_DIR}" CACHE PATH "Geode SDK Path" FORCE)
-endif()
+# Gán cứng trực tiếp đường dẫn SDK từ biến môi trường
+set(Geode_DIR "$ENV{GEODE_SDK}" CACHE PATH "Geode SDK Path" FORCE)
 
-# 2. TẮT HOÀN TOÀN cơ chế chặn đường dẫn của iOS Toolchain
+# Tắt hoàn toàn cơ chế chặn đường dẫn của iOS Toolchain
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
 
 # Tìm và liên kết Geode SDK
 find_package(Geode REQUIRED)
 
-# Bật lại cơ chế chặn để đảm bảo an toàn cho các bước biên dịch sau của Apple
+# Khôi phục lại cơ chế chặn để đảm bảo an toàn cho các bước sau
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 # Quét toàn bộ file .cpp ở thư mục gốc và thư mục src
